@@ -1,0 +1,29 @@
+version: '3.8'  # Version de Docker Compose
+
+services:
+  backend:
+    build: ./back-end  # Chemin vers le Dockerfile du back-end
+    ports:
+      - "5252:5252"  # Mappe le port 5252 (interne) vers le port 5252 (externe)
+    volumes:
+      - ./back-end:/app  # Synchronise les fichiers locaux avec le conteneur
+    environment:
+      - FLASK_ENV=development  # Variable d'environnement pour Flask
+
+  frontend:
+    build: ./front-end  # Chemin vers le Dockerfile du front-end
+    ports:
+      - "9000:9000"  # Mappe vers le port 9000
+    depends_on:
+      - backend  # Le front-end dépend du back-end, il démarre après
+
+  proxy:
+    build:
+      context: ./proxy  # Chemin vers le répertoire contenant le Dockerfile de proxy
+      dockerfile: Dockerfile  # Nom du fichier Dockerfile (par défaut)
+    image: my-nginx-proxy  # Nom de l'image Docker
+    ports:
+      - "80:80"  # Mappe le port 80 du conteneur vers le port 80 de l'hôte
+    depends_on:
+      - frontend
+      - backend
